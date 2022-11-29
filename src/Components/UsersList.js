@@ -6,47 +6,94 @@ import Avatar from '@mui/material/Avatar';
 
 import axios from 'axios';
 
-const columns = [
-    { field: 'id', headerName: 'ID' },
-    { field: 'avatar', headerName: 'Avatar', width: 200, renderCell: (params) => { return (<Avatar alt={params.row.name} src={params.row.avatar} />) } },
-    { field: 'name', headerName: 'First name', width: 200 },
-    { field: 'email', headerName: 'Email Address', width: 200 },
-    { field: 'contact', headerName: 'Contact Number', width: 200 },
-    { field: 'createdAt', headerName: 'Created At', width: 200, type: 'dateTime' },
-];
+import { Box, Button, CircularProgress, Grid, IconButton } from '@mui/material';
+import Snackbar from '@mui/material/Snackbar';
+import { Delete, Edit } from '@mui/icons-material';
+
+import { useDispatch, useSelector } from '../redux/store';
+import { deleteUser, getUser, getUsers, setUser } from '../redux/slices/user';
+import { useNavigate } from "react-router-dom";
+import ConfirmDelete from './ConfirmDelete';
+
 
 export default function UsersDataTable() {
-    const [rows, setRows] = useState([]);
+    const dispatch = useDispatch();
 
-    const fetchUsers = async () => {
-        var config = {
-            method: 'get',
-            url: 'https://63553cf1da523ceadcfd4ca1.mockapi.io/api/v1/users',
-            headers: {}
-        };
-        await axios(config)
-            .then(function (response) {
-                // console.log(response.data);
-                setRows(response.data);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+    const { users, isLoading } = useSelector((state) => state.user);
+    const [open, setOpen] = React.useState(false);
+
+    let navigate = useNavigate();
+
+    const onDeleteHandler = (event, row) => {
+        console.log("delete", event, row);
+        dispatch(deleteUser(row.id))
+        setOpen(false)
+    };
+    const onEditHandler = (row) => {
+        navigate(`/users/${row.id}`);
     }
 
+    const columns = [
+        { field: 'id', headerName: 'ID' },
+        { field: 'avatar', headerName: 'Avatar', width: 200, renderCell: (params) => { return (<Avatar alt={params.row.name} src={params.row.avatar} />) } },
+        { field: 'name', headerName: 'First name', width: 200 },
+        { field: 'email', headerName: 'Email Address', width: 200 },
+        { field: 'contact', headerName: 'Contact Number', width: 200 },
+        { field: 'createdAt', headerName: 'Created At', width: 200, type: 'dateTime' },
+        {
+            field: 'action', headerName: '', width: 200, renderCell: (params) => {
+                return (
+                    <div>
+                        <IconButton
+                            color="success"
+                            variant="outlined"
+                            onClick={() => onEditHandler(params.row)}
+                        >
+                            <Edit></Edit>
+                        </IconButton>
+                        <IconButton
+                            size="small"
+                            color="error"
+                            onClick={(e) => setOpen(true)}
+                            variant="outlined">
+                            <Delete></Delete>
+                        </IconButton>
+                        <ConfirmDelete
+                            open={open}
+                            handleClose={() => setOpen(false)}
+                            handleDelete={(e) => { onDeleteHandler(e, params.row) }}>
+                        </ConfirmDelete>
+                    </div>
+                );
+            }
+        },
+
+    ];
+
+
     useEffect(() => {
-        // Update the document title using the browser API
-        // document.title = `You clicked ${count} times`;
-        fetchUsers();
-    }, []);
+        dispatch(getUsers());
+    }, [dispatch]);
+
+
+
     return (
-        <div style={{ height: 400, width: '100%' }}>
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
-                checkboxSelection />
-        </div>
+        <Box sx={{ flexGrow: 1 }} marginX='20'>
+            <Grid container spacing={2}>
+                <Grid item xs={12} height="400px">
+                    {isLoading ? (
+                        <CircularProgress />
+                    ) : (
+                        <DataGrid
+                            rows={users}
+                            columns={columns}
+                            pageSize={5}
+                            rowsPerPageOptions={[5]}
+                            checkboxSelection
+                        />
+                    )}
+                </Grid>
+            </Grid>
+        </Box>
     );
 }

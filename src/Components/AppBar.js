@@ -12,7 +12,6 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
-import GoogleIcon from '@mui/icons-material/Google';
 import LoginWithGoogle, {  auth } from "../Services/Firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { Divider } from '@mui/material';
@@ -20,12 +19,11 @@ import { useNavigate } from "react-router-dom";
 
 const pages = ['Home'];
 
-function ResponsiveAppBar() {
+function ResponsiveAppBar({props}) {
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
     const [loginUser, setLoginUser] = React.useState(null)
 
-    // const history = useHistory();
     let navigate = useNavigate();
 
     React.useEffect(() => {
@@ -134,7 +132,7 @@ function ResponsiveAppBar() {
                             textDecoration: 'none',
                         }}
                     >
-                        TestApp
+                        R1
                     </Typography>
 
                     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
